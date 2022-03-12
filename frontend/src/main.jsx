@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import 'antd/dist/antd.css';
 import './index.css'
-import SiderLayout from './components/SiderLayout'
+import MainLayout from './components/MainLayout'
 import {
   BrowserRouter,
   Routes,
@@ -13,7 +13,7 @@ import {
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>
-      <SiderLayout />
+      <MainLayout />
     </BrowserRouter>
   </React.StrictMode>,
   document.getElementById('root')

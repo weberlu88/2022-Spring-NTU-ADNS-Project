@@ -22,7 +22,7 @@ import {
 
 const { Header, Content, Footer, Sider } = Layout;
 
-class SiderLayout extends React.Component {
+class MainLayout extends React.Component {
   state = {
     collapsed: false,
   };
@@ -83,4 +83,4 @@ class SiderLayout extends React.Component {
   }
 }
 
-export default SiderLayout
+export default MainLayout
