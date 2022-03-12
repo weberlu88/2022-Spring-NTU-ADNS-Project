@@ -10,10 +10,11 @@ import { Typography } from 'antd';
 const { Title, Paragraph, Text } = Typography;
 import { Tag } from 'antd';
 import PersonalProfile from './PersonalProfile'
+import Forum from './Forum'
 import { Card } from 'antd';
 import { Row, Col } from 'antd';
 import {
-  BrowserRouter as Router,
+  BrowserRouter,
   Routes,
   Route,
   Link
@@ -43,18 +44,19 @@ class SiderLayout extends React.Component {
           </Title>
           <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline">
             <Menu.Item key="1" icon={<InfoOutlined />}>
-              {/* <Link to="/about">關於我</Link> */}
-              關於我
+              {/* 關於我 */}
+              <Link to="/">關於我</Link>
             </Menu.Item>
             <Menu.Item key="2" icon={<WechatFilled />}>
-              留言板
+              {/* 留言板 */}
+              <Link to="/forum">留言板</Link>
             </Menu.Item>
             <Menu.Item key="3" icon={<LoginOutlined />}>
               註冊/登入
             </Menu.Item>
-            <Menu.Item>
+            <Menu.Item key="4">
               <Tag icon={<TwitterOutlined />} color="#55acee">
-                造訪人數: { visitCount }
+                造訪人數: {visitCount}
               </Tag>
             </Menu.Item>
           </Menu>
@@ -68,7 +70,10 @@ class SiderLayout extends React.Component {
             </Breadcrumb>
 
             {/* 主畫面區域，使用Router切換元件 */}
-            <PersonalProfile />
+            <Routes>
+              <Route path="/" element={<PersonalProfile />} />
+              <Route path="/forum" element={<Forum />} />
+            </Routes>
 
           </Content>
           <Footer style={{ textAlign: 'center' }}>Weber Lu ©2022 from NTUMIS</Footer>
