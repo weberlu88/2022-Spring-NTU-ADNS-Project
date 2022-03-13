@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Row, Col, Input, Button } from 'antd';
 const { TextArea } = Input;
 
@@ -10,6 +11,13 @@ export default function Formun() {
   // onChange = ({ target: { value } }) => {
   //   this.setState({ value });
   // };
+
+  const [inputUsername, setInputUsername] = useState("");
+  const [inputComment, setInputComment] = useState("");
+
+  const onSubmit = ({ target: { value } }) => {
+    this.setState({ value });
+  };
 
   return (
 
