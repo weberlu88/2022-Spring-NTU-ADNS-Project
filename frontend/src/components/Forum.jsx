@@ -18,7 +18,7 @@ export default function Formun() {
 
   const [inputUsername, setInputUsername] = useState("");
   const [inputComment, setInputComment] = useState("");
-  const commentLists = []
+  const [commentLists, setCommentLists] = useState([]);
 
   function handleSubmit(e) {
     // 取值
