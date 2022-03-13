@@ -28,8 +28,8 @@ export default function Formun() {
     console.log('c: ', comment)
     setInputUsername(username)
     setInputComment(comment)
-    console.log('u: ', inputUsername)
-    console.log('c: ', inputComment)
+    console.log('u_state: ', inputUsername)
+    console.log('c_state: ', inputComment)
     // 新增留言到陣列中
     commentLists.push(username + ": " + comment)
     console.log('all: ', commentLists)
