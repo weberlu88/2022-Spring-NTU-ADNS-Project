@@ -7,7 +7,7 @@ import { Image } from 'antd';
 const { Title, Paragraph, Text, Link } = Typography;
 const { Header, Content, Footer, Sider } = Layout;
 
-// import img from '../images/miko_ride.jpg';
+import img from '../images/miko_ride.jpg';
 
 class PersonalProfile extends React.Component {
   render() {
@@ -15,7 +15,7 @@ class PersonalProfile extends React.Component {
       <Card title="About me" style={{ width: '50%' }}>
         <Row gutter={10}>
           <Col span={6}>
-            <Image src='./src/images/miko_ride.jpg' />
+            <Image src={img} />
           </Col>
           <Col span={18}>
             <Title level={3}>呂晟維</Title>
