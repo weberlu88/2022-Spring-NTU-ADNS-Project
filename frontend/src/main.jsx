@@ -4,7 +4,7 @@ import 'antd/dist/antd.css';
 import './index.css'
 import MainLayout from './components/MainLayout'
 import {
-  BrowserRouter,
+  HashRouter,
   Routes,
   Route,
   Link
@@ -12,9 +12,9 @@ import {
 
 ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
+    <HashRouter>
       <MainLayout />
-    </BrowserRouter>
+    </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')
 )
