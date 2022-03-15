@@ -1,0 +1,14 @@
+{
+  "name": "2022-Spring-NTU-ADNS-Project",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/weberlu88/2022-Spring-NTU-ADNS-Project.git",
+  "author": "r10725012 <luweber88@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "cd backend && yarn start",
+    "build": "cd frontend && yarn build",
+    "heroku-prebuild": "npm install -g yarn && cd frontend && yarn install --production=false && cd ../backend && yarn"
+  }
+
+}
