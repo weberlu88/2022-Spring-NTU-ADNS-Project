@@ -9,11 +9,14 @@ import {
   Route,
   Link
 } from "react-router-dom";
+import User from './components/User'
 
 ReactDOM.render(
   <React.StrictMode>
     <HashRouter>
       <MainLayout />
+      {/* try axios */}
+      <User />
     </HashRouter>
   </React.StrictMode>,
   document.getElementById('root')
