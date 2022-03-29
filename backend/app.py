@@ -30,6 +30,7 @@ class UserPost(Resource):
         return {}, 201
 
 class Login(Resource):
+    ''' 登入 '''
     def post(self):
         pass
 
@@ -39,7 +40,7 @@ class Comment(Resource):
         res = CommentModel.find_by_id(idComment)
         if res:
             return res
-        return {'message': 'Comment not found'}, 404 
+        return {'message': 'Comment not found.'}, 404 
 
     def put(self, idComment):
         ''' 修改留言 '''
@@ -52,7 +53,13 @@ class Comment(Resource):
 class CommentPost(Resource):
     def post(self):
         ''' 新增留言 '''
-        return
+        parser = reqparse.RequestParser()
+        parser.add_argument('idUser', type=str, required=True, help='userId cannot be blank.')
+        parser.add_argument('comment', type=str, required=True, help='comment cannot be blank.')
+        args = parser.parse_args()
+        if len(args['comment']) > 120:
+            return {'message': 'Comment extends max length.'}, 400
+        return 
 
 class CommentList(Resource):
     def get(self):
@@ -66,10 +73,11 @@ api.add_resource(UserPost, '/api/user', endpoint="user_registery")
 api.add_resource(Comment, '/api/comment/<int:idComment>', endpoint="comment")
 api.add_resource(CommentPost, '/api/comment', endpoint="create_comment")
 api.add_resource(CommentList, '/api/comments', endpoint="get_all_comments")
-api.add_resource(Login, 'api/login')
+api.add_resource(Login, '/api/login')
 # http://localhost:5000/api/user/1
 
 if __name__ == "__main__":
     from db import db
     db.init_app(app)
+    print(CommentModel.content.length)
     app.run(host = '127.0.0.1', port = 5000, debug = True)
