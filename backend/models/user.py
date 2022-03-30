@@ -1,3 +1,4 @@
+from __future__ import annotations
 from db import db
 
 class UserModel(db.Model):
@@ -6,7 +7,7 @@ class UserModel(db.Model):
     idUser = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False)
     loginCount = db.Column(db.Integer)
-    passwordSalt = db.Column(db.String(20))
+    passwordSalt = db.Column(db.String(32))
     passwordHash = db.Column(db.String(120))
     description = db.Column(db.String(120))
     isDelete = db.Column(db.Integer, nullable=False, default=0)
@@ -15,21 +16,23 @@ class UserModel(db.Model):
     comments = db.relationship("CommentModel", backref="UserModel", lazy=True)
 
     # override constructor
-    def __init__(self, username, passwordSalt, passwordHash):
+    def __init__(self, username, passwordSalt, passwordHash, description=""):
         # self.idUser = idUser
         self.username = username
         self.loginCount = 0
         self.passwordSalt = passwordSalt
         self.passwordHash = passwordHash
+        self.description = description
 
     def __repr__(self):
         return '<User %r>' % self.username
 
     def json(self):
         return {
-            # 'idUser': self.idUser, 
+            'idUser': self.idUser, 
             'username': self.username,
-            'loginCount': self.loginCount }
+            'loginCount': self.loginCount,
+            'description': self.description }
 
     def save_to_db(self):
         db.session.add(self)
@@ -40,14 +43,14 @@ class UserModel(db.Model):
         db.session.commit()
 
     @classmethod
-    def find_by_username(cls, username):
+    def find_by_username(cls, username) -> UserModel:
         return cls.query.filter_by(username=username).first()
 
     @classmethod
-    def find_by_id(cls, _id):
+    def find_by_id(cls, _id) -> UserModel:
         return cls.query.filter_by(idUser=_id).first()
 
     @classmethod
-    def create_user(cls, username, passwordSalt, passwordHash):
-        new_user = UserModel(username, passwordSalt, passwordHash)
+    def create_user(cls, username, passwordSalt, passwordHash, description=""):
+        new_user = UserModel(username, passwordSalt, passwordHash, description)
         new_user.save_to_db()

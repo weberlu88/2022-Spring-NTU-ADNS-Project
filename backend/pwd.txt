@@ -1,0 +1,13 @@
+系統管理者, qwert
+register_test, qwert
+register_testgasgfhffalfhjkgjkghg
+
+{
+    "username": "系統管理者",
+    "password": "qwert"
+}
+<?xml version="1.0" encoding="UTF-8"?>
+<aa>
+    <username>系統管理者</username>
+    <password>qwert</password>
+</aa>
