@@ -10,7 +10,7 @@ from utilities.passwordManager import generate_salt, generate_digest, validate_p
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.secret_key = 'keyyyyyyyyyyy'
-# app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['CORS_HEADERS'] = 'Content-Type'
 api = Api(app)
 
 class User(Resource):
@@ -123,6 +123,7 @@ class CommentListOfUser(Resource):
         return [r.json() for r in res]
 
 class VistCount(Resource):
+    @cross_origin()
     def get(self):
         return {'visitCount': InfoModel.getTotalVisitCount()}
 
