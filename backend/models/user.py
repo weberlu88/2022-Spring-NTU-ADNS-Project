@@ -13,7 +13,7 @@ class UserModel(db.Model):
     isDelete = db.Column(db.Integer, nullable=False, default=0)
     # a user could have zore/many comments
     # comments = db.relationship("Comment", back_populates="userOfComment")
-    comments = db.relationship("CommentModel", backref="UserModel", lazy=True)
+    # comments = db.relationship("CommentModel", backref="UserModel", lazy=True)
 
     # override constructor
     def __init__(self, username, passwordSalt, passwordHash, description=""):

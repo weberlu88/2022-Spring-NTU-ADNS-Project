@@ -10,24 +10,6 @@ import {
   Link
 } from "react-router-dom";
 
-import { apiGetVisitCount } from './requests'
-
-try {
-  const res = await apiGetVisitCount();
-  console.log(res.data);
-} catch(error) {
-  //Log errors
-  console.log(error.data);
-}
-
-apiGetVisitCount()
-  .then( res => {
-    console.log(res.data);
-  })
-  .catch( error => {
-    console.log(error);
-  });
-
 ReactDOM.render(
   <React.StrictMode>
     <HashRouter>

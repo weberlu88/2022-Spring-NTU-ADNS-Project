@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
 from flask import render_template
@@ -10,10 +10,12 @@ from utilities.passwordManager import generate_salt, generate_digest, validate_p
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.secret_key = 'keyyyyyyyyyyy'
-app.config['CORS_HEADERS'] = 'Content-Type'
+# app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}}) # https://flask-cors.readthedocs.io/en/latest/
 api = Api(app)
 
 class User(Resource):
+    @cross_origin()
     def get(self, username):
         res = UserModel.find_by_username(username)
         if res:
@@ -26,24 +28,29 @@ userParser.add_argument('password', type=str, required=True, help='password cann
 userParser.add_argument('description', type=str, required=False)
         
 class UserPost(Resource):
+    @cross_origin()
     def post(self):
         ''' 新增用戶(註冊) '''
         args = userParser.parse_args()
+        description = ''
         # print(args['username'], args['password'])
         if len(args['username']) == 0 or len(args['username']) > 20 or len(args['password']) > 20:
             return {'message': 'Invalid username or password.'}, 400
         if UserModel.find_by_username(args['username']):
             return {'message': 'Duplicate username.'}, 400
-        if len(args['description']) > 120:
+        if args['description'] is not None and len(args['description']) > 120:
             return {'message': 'Invalid username or password.'}, 400
+        if args['description'] is not None :
+            description = args['description']
 
         salt = generate_salt()
         hashed_password = generate_digest(args['password'], salt)
-        UserModel.create_user(args['username'], salt, hashed_password, args['description'])
+        UserModel.create_user(args['username'], salt, hashed_password, description)
         return {'message': 'Create successfully.'}, 201
 
 class Login(Resource):
     ''' 登入 '''
+    @cross_origin()
     def post(self):
         # json_data = request.get_json(force=True)
         args = userParser.parse_args()
@@ -59,10 +66,13 @@ class Login(Resource):
         if not validate_password(password, user.passwordSalt, user.passwordHash):
             return {'message': ERROR_MSG}, 400
         # login success
+        user.loginCount += 1
+        user.save_to_db()
         print('Login:', user)
         return user.json()
 
 class Comment(Resource):
+    @cross_origin()
     def get(self, idComment):
         ''' 取得留言 '''
         res = CommentModel.find_by_id(idComment)
@@ -76,6 +86,7 @@ class Comment(Resource):
     #     return
     
     # 尚未驗證身分!!
+    @cross_origin()
     def delete(self, idComment):
         ''' 刪除留言 '''
         parser = reqparse.RequestParser()
@@ -93,6 +104,7 @@ class Comment(Resource):
          
 
 class CommentPost(Resource):
+    @cross_origin()
     def post(self):
         ''' 新增留言 '''
         parser = reqparse.RequestParser()
@@ -109,22 +121,25 @@ class CommentPost(Resource):
         return {'message': 'Create successfully.'}, 201
 
 class CommentList(Resource):
+    @cross_origin()
     def get(self):
         ''' 訪客?取得所有留言 '''
         res = CommentModel.get_all_comments()
         print(res)
-        return [r.json() for r in res]
+        return jsonify([r.json() for r in res])
 
 class CommentListOfUser(Resource):
+    @cross_origin()
     def get(self, idUser):
         ''' 取得該用戶的所有留言 '''
         res = CommentModel.find_by_userId(idUser)
         print(res)
-        return [r.json() for r in res]
+        return jsonify([r.json() for r in res])
 
 class VistCount(Resource):
     @cross_origin()
     def get(self):
+        return {'message': 'User not found.'}, 400
         return {'visitCount': InfoModel.getTotalVisitCount()}
 
 api.add_resource(User, '/api/user/<string:username>', endpoint="user_get")

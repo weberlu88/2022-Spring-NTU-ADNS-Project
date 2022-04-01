@@ -32,7 +32,7 @@ def constant_time_compare(val1: str, val2: str) -> bool:
 # res = constant_time_compare('aaaaa', 'aaaa')
 # print(res)
 
-salt = generate_salt()
-hashed_password = generate_digest('qwert', salt)
-print('salt:', salt)
-print('hpwd:', hashed_password)
+# salt = generate_salt()
+# hashed_password = generate_digest('qwert', salt)
+# print('salt:', salt)
+# print('hpwd:', hashed_password)
