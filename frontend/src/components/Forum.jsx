@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom'
-import { Row, Col, Input, Button } from 'antd';
+import { Row, Col, Input, Button, Form } from 'antd';
+import { Comment, List, Avatar } from 'antd';
+import { Breadcrumb } from 'antd';
 const { TextArea } = Input;
+import { apiGetAllComments, apiCreateComment } from '../requests'
 
 export default function Formun() {
   // https://ant.design/components/input/#header
-  // state = {
-  //   value: '',
-  // };
 
   // onChange = ({ target: { value } }) => {
   //   this.setState({ value });
@@ -16,67 +16,100 @@ export default function Formun() {
   // https://zh-hant.reactjs.org/docs/forms.html
   // https://zh-hant.reactjs.org/docs/handling-events.html
 
-  const [inputUsername, setInputUsername] = useState("");
-  const [inputComment, setInputComment] = useState("");
-  const [commentLists, setCommentLists] = useState([]);
+  // const [inputUsername, setInputUsername] = useState("");
+  // const [inputComment, setInputComment] = useState("123");
+  // const [form] = Form.useForm();
+  const [commentList, setCommentList] = useState([]);
 
-  function handleSubmit(e) {
-    // 取值
-    const username = document.getElementById('username').value;
-    const comment = document.getElementById('comment').textContent
-    console.log('u: ', username)
-    console.log('c: ', comment)
-    setInputUsername(username)
-    setInputComment(comment)
-    console.log('u_state: ', inputUsername)
-    console.log('c_state: ', inputComment)
-    // 新增留言到陣列中
-    commentLists.push(username + ": " + comment)
-    console.log('all: ', commentLists)
-    // 重新渲染留言 Element
-    let lists = commentLists.map(function (item, idx) {
-      return <li key={idx}>{item}</li>
-    });
-    ReactDOM.render(
-      <ul>
-        {lists}
-      </ul>,
-      document.getElementById('comment_list')
-    );
-  }
+  /* Called when rendered (mounted) */
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const onFinish = values => {
+    console.log('Received values of form: ', values);
+    if (values.comment.length > 120) {
+      alert('Please leave your comment! (less than 120 chars)');
+      return
+    }
+    const requestBody = {
+      idUser: 1,
+      comment: values.comment
+    }
+    creatComment(requestBody);
+  };
+
+  const creatComment = async (requestBody) => {
+    try {
+      const responde = await apiCreateComment(requestBody);
+      fetchData();
+    } catch (error) {
+      console.log("error: ", error.data.message);
+    }
+  };
+
+  const fetchData = async () => {
+    try {
+      const response = await apiGetAllComments();
+      console.log(response);
+      setCommentList(response.data);
+    } catch (error) {
+      console.log("error: ", error.data.message);
+    }
+  };
 
   return (
 
     <main style={{ padding: "1rem 0" }}>
-      <h2>Forum</h2>
+      <Breadcrumb style={{ margin: '16px 0' }}>
+        <Breadcrumb.Item>Site</Breadcrumb.Item>
+        <Breadcrumb.Item>Forum</Breadcrumb.Item>
+      </Breadcrumb>
 
-      <div style={{ width: '40%' }}>
-        <Row>
-          <Col span={6} style={{ fontWeight: 'bold' }}>暱稱</Col>
-          <Col span={18}><Input id="username" placeholder="匿名使用者" /></Col>
-        </Row>
-        <Row>
-          <Col span={6} style={{ fontWeight: 'bold' }}>留言</Col>
-          <Col span={18}>
-            <TextArea
-              id="comment"
-              // value={value}
-              // onChange={setInputComment}
-              placeholder="Leave some messages"
-              autoSize={{ minRows: 2, maxRows: 3 }}
-            />
-          </Col>
-        </Row>
-        <Row gutter={[16, 24]}>
-          <Col span={3} offset={21}>
-            <Button id="btn_comment" type="primary" style={{ float: 'right' }} onClick={handleSubmit}>Send</Button>
-          </Col>
-        </Row>
+      <h2>Welcom to Forum</h2>
+
+      <div style={{ width: '50%' }}>
+        <Form
+          // form={form}
+          name="commentForm"
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 16 }}
+          // initialValues={{ remember: true }}
+          onFinish={onFinish}
+          // onFinishFailed={onFinishFailed}
+          autoComplete="off"
+        >
+          <Form.Item
+            label="留個言吧"
+            name="comment"
+            rules={[{ required: true, message: 'Please leave your comment! (less than 120 chars)' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item wrapperCol={{ offset: 4, span: 16 }}>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
 
         {/* 留言顯示區 */}
-        <div id="comment_list">
-
-        </div>
+        <List
+          className="comment-list"
+          header={`${commentList.length} comments`}
+          itemLayout="horizontal"
+          dataSource={commentList}
+          renderItem={item => (
+            <li>
+              <Comment
+                author={item.username}
+                avatar={<Avatar src="https://joeschmoe.io/api/v1/random" alt="Avator" />}
+                content={item.content}
+                datetime={item.time}
+              />
+            </li>
+          )}
+        />
       </div>
     </main >
   );
