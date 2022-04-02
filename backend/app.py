@@ -1,7 +1,15 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
 from flask import render_template
+
+from flask_jwt_extended import create_access_token
+from flask_jwt_extended import get_jwt_identity
+from flask_jwt_extended import jwt_required
+from flask_jwt_extended import JWTManager
+from flask_jwt_extended import set_access_cookies
+from flask_jwt_extended import unset_jwt_cookies
+
 from models.user import UserModel
 from models.comment import CommentModel
 from models.info import InfoModel
@@ -9,10 +17,16 @@ from utilities.passwordManager import generate_salt, generate_digest, validate_p
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.secret_key = 'keyyyyyyyyyyy'
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"] # options: "headers", "json", "query_string"
+app.config["JWT_COOKIE_SECURE"] = True # only allow the cookies that contain your JWTs to be sent over https
+app.config["JWT_COOKIE_SAMESITE"] = "None"
+app.config["JWT_SECRET_KEY"] = "super-secret-jfi;l_8"
+app.secret_key = 'keyyyyyyyyyyy-y^%#M.'
 # app.config['CORS_HEADERS'] = 'Content-Type'
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}}) # https://flask-cors.readthedocs.io/en/latest/
+whitelist = ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://127.0.0.1:3000', 'https://localhost:3000']
+cors = CORS(app, resources={r"/api/*": {"origins": whitelist}}, supports_credentials=True,) # https://flask-cors.readthedocs.io/en/latest/
 api = Api(app)
+jwt = JWTManager(app)
 
 class User(Resource):
     @cross_origin()
@@ -46,7 +60,7 @@ class UserPost(Resource):
         salt = generate_salt()
         hashed_password = generate_digest(args['password'], salt)
         UserModel.create_user(args['username'], salt, hashed_password, description)
-        return {'message': 'Create successfully.'}, 201
+        return jsonify({'message': 'Create successfully.'}) #201前端收不到?
 
 class Login(Resource):
     ''' 登入 '''
@@ -69,7 +83,11 @@ class Login(Resource):
         user.loginCount += 1
         user.save_to_db()
         print('Login:', user)
-        return user.json()
+        # set JWT
+        access_token = create_access_token(identity=str(user.idUser))
+        resp = make_response(user.json())
+        set_access_cookies(resp, access_token)
+        return resp
 
 class Comment(Resource):
     @cross_origin()
@@ -121,6 +139,7 @@ class CommentPost(Resource):
         return {'message': 'Create successfully.'}, 201
 
 class CommentList(Resource):
+    # @jwt_required()
     @cross_origin()
     def get(self):
         ''' 訪客?取得所有留言 '''
@@ -139,7 +158,6 @@ class CommentListOfUser(Resource):
 class VistCount(Resource):
     @cross_origin()
     def get(self):
-        return {'message': 'User not found.'}, 400
         return {'visitCount': InfoModel.getTotalVisitCount()}
 
 api.add_resource(User, '/api/user/<string:username>', endpoint="user_get")
@@ -155,4 +173,5 @@ api.add_resource(VistCount, '/api/visitCount')
 if __name__ == "__main__":
     from db import db
     db.init_app(app)
-    app.run(host = '127.0.0.1', port = 5000, debug = True)
+    app.run(host = '127.0.0.1', port = 5000, debug = True, 
+        ssl_context=('./assets/certificate.crt', './assets/privateKey.key'))
