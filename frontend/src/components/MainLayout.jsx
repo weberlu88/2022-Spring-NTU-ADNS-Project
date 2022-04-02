@@ -11,6 +11,7 @@ const { Title, Paragraph, Text } = Typography;
 import { Tag } from 'antd';
 import PersonalProfile from './PersonalProfile'
 import Forum from './Forum'
+import LoginRegisterForm from './Login';
 import { Card } from 'antd';
 import { Row, Col } from 'antd';
 import {
@@ -52,7 +53,7 @@ class MainLayout extends React.Component {
               <Link to="/forum">留言板</Link>
             </Menu.Item>
             <Menu.Item key="3" icon={<LoginOutlined />}>
-              註冊/登入
+              <Link to="/loginRegister">註冊/登入</Link>
             </Menu.Item>
             <Menu.Item key="4">
               <Tag icon={<TwitterOutlined />} color="#55acee">
@@ -69,6 +70,7 @@ class MainLayout extends React.Component {
             <Routes>
               <Route path="/" element={<PersonalProfile />} />
               <Route path="/forum" element={<Forum />} />
+              <Route path="/loginRegister" element={<LoginRegisterForm />} />
             </Routes>
 
           </Content>
