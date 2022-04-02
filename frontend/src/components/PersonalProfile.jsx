@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { Card } from 'antd';
 import { Row, Col } from 'antd';
 import { Typography } from 'antd';
@@ -11,6 +11,7 @@ const { Header, Content, Footer, Sider } = Layout;
 import img from '../images/miko_ride.jpg';
 
 class PersonalProfile extends React.Component {
+
   render() {
     return (
       <div style={{ padding: "1rem 0" }}>

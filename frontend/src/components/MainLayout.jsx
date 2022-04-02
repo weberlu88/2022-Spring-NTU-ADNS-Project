@@ -20,22 +20,43 @@ import {
   Route,
   Link
 } from "react-router-dom";
+import { apiGetVisitCount } from '../requests'
 
 const { Header, Content, Footer, Sider } = Layout;
 
 class MainLayout extends React.Component {
-  state = {
-    collapsed: false,
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      collapsed: false,
+      authenticated: false, // 是否登入的 flag
+      idUser: undefined,    // 若已登入則儲存用戶id，若訪客則undefined
+      visitCount: 1
+    };
+    this.getVisitCount = this.getVisitCount.bind(this);
+  }
+
+  async getVisitCount() {
+    try {
+      let res = await apiGetVisitCount()
+      // console.log(res.data.visitCount)
+      this.setState({ visitCount: res.data.visitCount })
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   onCollapse = collapsed => {
     console.log(collapsed);
     this.setState({ collapsed });
   };
 
+  componentDidMount() {
+    this.getVisitCount()
+  }
+
   render() {
     const { collapsed } = this.state;
-    let visitCount = 1;
 
     return (
       <Layout style={{ minHeight: '100vh' }}>
@@ -57,7 +78,7 @@ class MainLayout extends React.Component {
             </Menu.Item>
             <Menu.Item key="4">
               <Tag icon={<TwitterOutlined />} color="#55acee">
-                造訪人數: {visitCount}
+                造訪人數: {this.state.visitCount}
               </Tag>
             </Menu.Item>
           </Menu>

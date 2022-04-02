@@ -1,22 +1,21 @@
 import React from 'react'
 import { Breadcrumb } from 'antd';
-import { Row, Col, Input, Button, Form, Card } from 'antd';
+import { Row, Col, Input, Button, Form } from 'antd';
 import { apiLogin, apiRegister } from '../requests'
-import RegisterForm from './Register'
-import ErrorMsg from './ErrorMsg';
+import ErrorMsg from './ErrorMsg'
 
-class LoginRegisterForm extends React.Component {
+class RegisterForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       authenticated: false,
-      loginTextInput: { username: '', password: '' },
+      registerTextInput: { username: '', password: '', description: '' },
       errorMessage: ''
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.postLogin = this.postLogin.bind(this);
+    this.postRegister = this.postRegister.bind(this);
   }
 
   /** @type {React.ChangeEventHandler<HTMLInputElement>} */
@@ -25,8 +24,8 @@ class LoginRegisterForm extends React.Component {
     const val = event.target.value
     // console.log(key, val)
     this.setState({
-      loginTextInput: {
-        ...this.state.loginTextInput,
+      registerTextInput: {
+        ...this.state.registerTextInput,
         [key]: val,
       }
     });
@@ -34,18 +33,18 @@ class LoginRegisterForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.postLogin(this.state.loginTextInput);
+    this.postRegister(this.state.registerTextInput);
   }
 
-  async postLogin(requestBody) {
+  async postRegister(requestBody) {
     try {
-      let res = await apiLogin(requestBody)
-      // this.state.authenticated = true
-      // console.log(res.data.username)
+      let successInfo = (await apiRegister(requestBody)).data.message
+      // console.log(successInfo)
       this.setState({ errorMessage: '' })
-      alert(`login sucuess! ${res.data.username}.`)
+      alert(`${successInfo}`)
     } catch (error) {
-      // console.log("error: ", error.data.message)
+      // alert("error: ", error.data.message)
+      // console.log(`error type: ${typeof error}`)
       this.setState({ errorMessage: error.data.message })
     }
   }
@@ -53,46 +52,42 @@ class LoginRegisterForm extends React.Component {
   render() {
     return (
       <div style={{ padding: "1rem 0" }}>
-        {/* 登入 */}
+
+        {/* 註冊 */}
         <Breadcrumb style={{ margin: '16px 0' }}>
           <Breadcrumb.Item>Site</Breadcrumb.Item>
-          <Breadcrumb.Item>Login</Breadcrumb.Item>
+          <Breadcrumb.Item>Register</Breadcrumb.Item>
         </Breadcrumb>
         <ErrorMsg msg={this.state.errorMessage} />
         <form onSubmit={this.handleSubmit}>
           <Row>
             <label>
               使用者名稱:
-              <Input name="username" value={this.state.loginTextInput.username}
+              <Input name="username" value={this.state.registerTextInput.username}
                 onChange={this.handleChange} />
             </label>
           </Row>
           <Row>
             <label>
               請輸入密碼:
-              <Input name="password" value={this.state.loginTextInput.password}
+              <Input name="password" value={this.state.registerTextInput.password}
                 onChange={this.handleChange} />
             </label>
+          </Row>
+          <Row>
+            <label>
+              寫點自介吧:
+              <Input name="description" value={this.state.registerTextInput.description}
+                onChange={this.handleChange} />
+            </label>
+
           </Row>
 
           <input type="submit" value="Submit" />
         </form>
-
-        {/* 註冊 */}
-        <br />
-        <RegisterForm />
-
-        <br />
-        <Card title="規則" style={{ width: '700px' }}>
-          <p>
-            (1) 姓名、密碼最長20字元，不可為空 <br />
-            (2) 自我介紹最長120字元，允許空值 <br />
-            (3) 圖片僅接受小於1MB的圖片，不附圖將使用預設頭貼，副檔名限jpeg、png
-          </p>
-        </Card>
       </div >
     );
   }
 }
 
-export default LoginRegisterForm;
+export default RegisterForm;
