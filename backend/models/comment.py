@@ -24,7 +24,7 @@ class CommentModel(db.Model):
     def json(self):
         return {
             'idComment': self.idComment, 
-            # 'idUser': self.idUser, # no show?
+            'idUser': self.idUser, # no show?
             'username': self.userOfComment.username,
             'content': self.content,
             'time': self.time }

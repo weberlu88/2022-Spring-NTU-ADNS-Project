@@ -13,20 +13,23 @@ from flask_jwt_extended import unset_jwt_cookies
 from models.user import UserModel
 from models.comment import CommentModel
 from models.info import InfoModel
+from utilities.strToInt import parseInt
 from utilities.passwordManager import generate_salt, generate_digest, validate_password
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config["JWT_TOKEN_LOCATION"] = ["cookies"] # options: "headers", "json", "query_string"
+app.config["JWT_TOKEN_LOCATION"] = ["headers"] # options: "cookies", "json", "query_string"
 app.config["JWT_COOKIE_SECURE"] = True # only allow the cookies that contain your JWTs to be sent over https
 app.config["JWT_COOKIE_SAMESITE"] = "None"
 app.config["JWT_SECRET_KEY"] = "super-secret-jfi;l_8"
 app.secret_key = 'keyyyyyyyyyyy-y^%#M.'
 # app.config['CORS_HEADERS'] = 'Content-Type'
 whitelist = ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://127.0.0.1:3000', 'https://localhost:3000']
-cors = CORS(app, resources={r"/api/*": {"origins": whitelist}}, supports_credentials=True,) # https://flask-cors.readthedocs.io/en/latest/
+cors = CORS(app, resources={r"/api/*": {"origins": whitelist}}, supports_credentials=True) # https://flask-cors.readthedocs.io/en/latest/
 api = Api(app)
 jwt = JWTManager(app)
+
+AUTH_FAILLED = 'Authentication failed.'
 
 class User(Resource):
     @cross_origin()
@@ -62,6 +65,30 @@ class UserPost(Resource):
         UserModel.create_user(args['username'], salt, hashed_password, description)
         return jsonify({'message': 'Create successfully.'}) #201前端收不到?
 
+# for test
+# @app.route("/api/test", methods=['GET'])
+# def test():
+#     access_token = create_access_token(identity=str(1))
+#     # Set cookie
+#     response = jsonify(status='success')
+#     response.set_cookie(
+#         'access_token', access_token, 
+#         domain=".app.localhost", 
+#         path='/', 
+#         max_age=600,
+#         secure=True, 
+#         httponly=False,
+#         samesite="None"
+#     )
+#     return response
+
+# for test
+# @app.route("/api/recieve", methods=['GET'])
+# def recieve_cookie():
+#     access_token = request.cookies.get('access_token')
+#     print('access_token:',access_token)
+#     return {}
+
 class Login(Resource):
     ''' 登入 '''
     @cross_origin()
@@ -85,8 +112,11 @@ class Login(Resource):
         print('Login:', user)
         # set JWT
         access_token = create_access_token(identity=str(user.idUser))
-        resp = make_response(user.json())
-        set_access_cookies(resp, access_token)
+        # resp = make_response(user.json())
+        # set_access_cookies(resp, access_token)
+        # return resp
+        resp = user.json()
+        resp['access_token'] = access_token
         return resp
 
 class Comment(Resource):
@@ -103,25 +133,30 @@ class Comment(Resource):
     #     ''' 修改留言 '''
     #     return
     
-    # 尚未驗證身分!!
+    @jwt_required()
     @cross_origin()
     def delete(self, idComment):
         ''' 刪除留言 '''
         parser = reqparse.RequestParser()
         parser.add_argument('idUser', type=int, required=True, help='userId cannot be blank.')
         args = parser.parse_args()
+        print('args', args)
         idUser = args['idUser']
+        # auth double check
+        current_userId = parseInt(get_jwt_identity())
+        if current_userId is None or current_userId != args['idUser']:
+            return {'message': AUTH_FAILLED}, 400
 
         res = CommentModel.find_by_id(idComment)
         if res is None:
             return {'message': 'Comment not found.'}, 404
         if res.idUser != idUser:
-            return {'message': 'Authentication failed.'}, 404
+            return {'message': AUTH_FAILLED}, 400
         res.stash_from_db()
         return {'message': 'Delete successfully.'}, 200
          
-
 class CommentPost(Resource):
+    @jwt_required()
     @cross_origin()
     def post(self):
         ''' 新增留言 '''
@@ -134,12 +169,15 @@ class CommentPost(Resource):
             return {'message': 'User not found.'}, 400
         if len(args['comment']) > 120 or len(args['comment']) == 0:
             return {'message': 'Comment extends max length.'}, 400
+        # auth check: 驗證isDuser和token一致
+        current_userId = parseInt(get_jwt_identity())
+        if current_userId is None or current_userId != args['idUser']:
+            return {'message': AUTH_FAILLED}, 400
         
         CommentModel.create_comment(args['idUser'], args['comment'])
         return {'message': 'Create successfully.'}, 201
 
 class CommentList(Resource):
-    # @jwt_required()
     @cross_origin()
     def get(self):
         ''' 訪客?取得所有留言 '''
