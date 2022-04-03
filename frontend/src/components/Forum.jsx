@@ -4,15 +4,10 @@ import { Row, Col, Input, Button, Form } from 'antd';
 import { Comment, List, Avatar } from 'antd';
 import { Breadcrumb } from 'antd';
 const { TextArea } = Input;
-import { apiGetAllComments, apiCreateComment } from '../requests'
+import ErrorMsg from './ErrorMsg';
+import { apiGetAllComments, apiCreateComment, apiDeleteComment } from '../requests'
 
-export default function Formun() {
-  // https://ant.design/components/input/#header
-
-  // onChange = ({ target: { value } }) => {
-  //   this.setState({ value });
-  // };
-
+export default function Formun({ idUser, username, access_token }) {
   // https://zh-hant.reactjs.org/docs/forms.html
   // https://zh-hant.reactjs.org/docs/handling-events.html
 
@@ -20,6 +15,7 @@ export default function Formun() {
   // const [inputComment, setInputComment] = useState("123");
   // const [form] = Form.useForm();
   const [commentList, setCommentList] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
   /* Called when rendered (mounted) */
   useEffect(() => {
@@ -27,36 +23,55 @@ export default function Formun() {
   }, []);
 
   const onFinish = values => {
-    console.log('Received values of form: ', values);
-    if (values.comment.length > 120) {
-      alert('Please leave your comment! (less than 120 chars)');
+    // console.log('Received values of form: ', values);
+    if (!access_token) {
+      setErrorMessage(`Please login.`)
       return
     }
+    if (values.comment.length > 120) {
+      return setErrorMessage('Please leave your comment! (less than 120 chars)');
+    }
     const requestBody = {
-      idUser: 1,
-      comment: values.comment
+      idUser: idUser,
+      comment: values.comment,
+      token: access_token,
     }
     creatComment(requestBody);
   };
 
   const creatComment = async (requestBody) => {
     try {
-      const responde = await apiCreateComment(requestBody);
+      const response = await apiCreateComment(requestBody);
       fetchData();
     } catch (error) {
-      console.log("error: ", error.data.message);
+      if (error.data?.message) {
+        setErrorMessage("error: ", error.data.message);
+      }
+      else {
+        setErrorMessage("error: ", error);
+      }
     }
   };
 
   const fetchData = async () => {
     try {
       const response = await apiGetAllComments();
-      console.log(response);
+      // console.log(response);
       setCommentList(response.data);
     } catch (error) {
-      console.log("error: ", error.data.message);
+      setErrorMessage("error: ", error.data.message);
     }
   };
+
+  const deleteComment = async (idComment) => {
+    // console.log(`delete comment id ${idComment}`)
+    try {
+      const response = await apiDeleteComment(idComment, idUser, access_token)
+      fetchData();
+    } catch (error) {
+      setErrorMessage("error: ", error.data.message);
+    }
+  }
 
   return (
 
@@ -66,9 +81,10 @@ export default function Formun() {
         <Breadcrumb.Item>Forum</Breadcrumb.Item>
       </Breadcrumb>
 
-      <h2>Welcom to Forum</h2>
+      <h2>Welcom to Forum {username ? `, ${username}.` : ``}</h2>
 
-      <div style={{ width: '50%' }}>
+      <div style={{ width: '60%' }}>
+        <ErrorMsg msg={errorMessage} />
         <Form
           // form={form}
           name="commentForm"
@@ -101,12 +117,22 @@ export default function Formun() {
           dataSource={commentList}
           renderItem={item => (
             <li>
-              <Comment
-                author={item.username}
-                avatar={<Avatar src="https://joeschmoe.io/api/v1/random" alt="Avator" />}
-                content={item.content}
-                datetime={item.time}
-              />
+              <Row align="middle">
+                <Comment
+                  author={item.username}
+                  avatar={<Avatar src="https://joeschmoe.io/api/v1/random" alt="Avator" />}
+                  content={item.content}
+                  datetime={item.time}
+                />
+                {
+                  item.idUser === idUser ?
+                    <Button style={{ marginLeft: '10px' }} onClick={() => deleteComment(item.idComment)}>
+                      刪除
+                    </Button>
+                    : <></>
+                }
+
+              </Row>
             </li>
           )}
         />

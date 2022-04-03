@@ -10,7 +10,19 @@ const { Header, Content, Footer, Sider } = Layout;
 
 import img from '../images/miko_ride.jpg';
 
+// import { apiGetCookieTest } from '../requests'
+
 class PersonalProfile extends React.Component {
+
+  // componentDidMount() {
+  //   apiGetCookieTest()
+  //     .then(res => {
+  //       console.log(res);
+  //     })
+  //     .catch(error => {
+  //       console.log(error.data.message);
+  //     });
+  // }
 
   render() {
     return (

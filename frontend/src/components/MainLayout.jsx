@@ -29,11 +29,22 @@ class MainLayout extends React.Component {
     super(props);
     this.state = {
       collapsed: false,
-      authenticated: false, // 是否登入的 flag
-      idUser: undefined,    // 若已登入則儲存用戶id，若訪客則undefined
+      access_token: undefined,  // 是否登入的 flag
+      idUser: undefined,        // 若已登入則儲存用戶id，若訪客則undefined
+      username: undefined,
       visitCount: 1
     };
     this.getVisitCount = this.getVisitCount.bind(this);
+    this.handleStateChange = this.handleStateChange.bind(this);
+  }
+
+  handleStateChange(idUser, username, access_token) {
+    this.setState({
+      idUser: idUser,
+      username: username,
+      access_token: access_token,
+    });
+    // console.log(`setState idUser: ${idUser}`)
   }
 
   async getVisitCount() {
@@ -57,6 +68,8 @@ class MainLayout extends React.Component {
 
   render() {
     const { collapsed } = this.state;
+    // const idUser = this.state.idUser;
+    // const access_token = this.state.access_token;
 
     return (
       <Layout style={{ minHeight: '100vh' }}>
@@ -90,8 +103,15 @@ class MainLayout extends React.Component {
             {/* 主畫面區域，使用Router切換元件 */}
             <Routes>
               <Route path="/" element={<PersonalProfile />} />
-              <Route path="/forum" element={<Forum />} />
-              <Route path="/loginRegister" element={<LoginRegisterForm />} />
+              <Route path="/forum" element={<Forum
+                idUser={this.state.idUser}
+                username={this.state.username}
+                access_token={this.state.access_token} />} />
+              <Route path="/loginRegister" element={<LoginRegisterForm
+                idUser={this.state.idUser}
+                access_token={this.state.access_token}
+                onLogin={this.handleStateChange}
+              />} />
             </Routes>
 
           </Content>

@@ -9,7 +9,6 @@ class LoginRegisterForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      authenticated: false,
       loginTextInput: { username: '', password: '' },
       errorMessage: ''
     };
@@ -44,6 +43,11 @@ class LoginRegisterForm extends React.Component {
       // console.log(res.data.username)
       this.setState({ errorMessage: '' })
       alert(`login sucuess! ${res.data.username}.`)
+      // record access_token & idUser & name
+      this.props.onLogin(
+        res.data.idUser,
+        res.data.username,
+        res.data.access_token)
     } catch (error) {
       // console.log("error: ", error.data.message)
       this.setState({ errorMessage: error.data.message })
