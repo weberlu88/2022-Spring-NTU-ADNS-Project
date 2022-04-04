@@ -3,12 +3,13 @@ import { Breadcrumb } from 'antd';
 import { Row, Col, Input, Button, Form } from 'antd';
 import { apiLogin, apiRegister } from '../requests'
 import ErrorMsg from './ErrorMsg'
+import Uploader from './Upload'
 
 class RegisterForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      authenticated: false,
+      imageBase64: undefined,
       registerTextInput: { username: '', password: '', description: '' },
       errorMessage: ''
     };
@@ -80,8 +81,9 @@ class RegisterForm extends React.Component {
               <Input name="description" value={this.state.registerTextInput.description}
                 onChange={this.handleChange} />
             </label>
-
           </Row>
+
+          <Uploader setImage={res => { this.setState({ imageBase64: res }) }} />
 
           <input type="submit" value="Submit" />
         </form>
