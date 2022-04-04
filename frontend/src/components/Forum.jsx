@@ -73,6 +73,12 @@ export default function Formun({ idUser, username, access_token }) {
     }
   }
 
+  const getAvatar = (commentItem) => {
+    if (commentItem.avatar)
+      return commentItem.avatar
+    return "https://joeschmoe.io/api/v1/random"
+  }
+
   return (
 
     <main style={{ padding: "1rem 0" }}>
@@ -120,7 +126,7 @@ export default function Formun({ idUser, username, access_token }) {
               <Row align="middle">
                 <Comment
                   author={item.username}
-                  avatar={<Avatar src="https://joeschmoe.io/api/v1/random" alt="Avator" />}
+                  avatar={<Avatar size="large" src={getAvatar(item)} alt="Avator" />}
                   content={item.content}
                   datetime={item.time}
                 />

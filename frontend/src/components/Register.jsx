@@ -34,7 +34,10 @@ class RegisterForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    this.postRegister(this.state.registerTextInput);
+    this.postRegister({
+      ...this.state.registerTextInput,
+      avatar: this.state.imageBase64
+    });
   }
 
   async postRegister(requestBody) {
@@ -42,7 +45,7 @@ class RegisterForm extends React.Component {
       let successInfo = (await apiRegister(requestBody)).data.message
       // console.log(successInfo)
       this.setState({ errorMessage: '' })
-      alert(`${successInfo}`)
+      alert(`${successInfo} Please login.`)
     } catch (error) {
       // alert("error: ", error.data.message)
       // console.log(`error type: ${typeof error}`)
