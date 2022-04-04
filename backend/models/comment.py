@@ -26,6 +26,7 @@ class CommentModel(db.Model):
             'idComment': self.idComment, 
             'idUser': self.idUser, # no show?
             'username': self.userOfComment.username,
+            'avatar': self.userOfComment.avatar,
             'content': self.content,
             'time': self.time }
 

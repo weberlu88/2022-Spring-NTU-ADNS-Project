@@ -10,19 +10,21 @@ class UserModel(db.Model):
     passwordSalt = db.Column(db.String(32))
     passwordHash = db.Column(db.String(120))
     description = db.Column(db.String(120))
+    avatar = db.Column(db.String)
     isDelete = db.Column(db.Integer, nullable=False, default=0)
     # a user could have zore/many comments
     # comments = db.relationship("Comment", back_populates="userOfComment")
     # comments = db.relationship("CommentModel", backref="UserModel", lazy=True)
 
     # override constructor
-    def __init__(self, username, passwordSalt, passwordHash, description=""):
+    def __init__(self, username, passwordSalt, passwordHash, description="", avatar=""):
         # self.idUser = idUser
         self.username = username
         self.loginCount = 0
         self.passwordSalt = passwordSalt
         self.passwordHash = passwordHash
         self.description = description
+        self.avatar = avatar
 
     def __repr__(self):
         return '<User %r>' % self.username
@@ -32,7 +34,8 @@ class UserModel(db.Model):
             'idUser': self.idUser, 
             'username': self.username,
             'loginCount': self.loginCount,
-            'description': self.description }
+            'description': self.description,
+            'avatar': self.avatar }
 
     def save_to_db(self):
         db.session.add(self)
@@ -51,6 +54,6 @@ class UserModel(db.Model):
         return cls.query.filter_by(idUser=_id).first()
 
     @classmethod
-    def create_user(cls, username, passwordSalt, passwordHash, description=""):
-        new_user = UserModel(username, passwordSalt, passwordHash, description)
+    def create_user(cls, username, passwordSalt, passwordHash, description="", avatar=""):
+        new_user = UserModel(username, passwordSalt, passwordHash, description, avatar)
         new_user.save_to_db()

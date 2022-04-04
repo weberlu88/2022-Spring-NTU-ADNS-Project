@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify, make_response
+import os
+from flask import Flask, request, jsonify, make_response, send_from_directory
 from flask_restful import Resource, Api, reqparse
 from flask_cors import CORS, cross_origin
 from flask import render_template
@@ -16,7 +17,7 @@ from models.info import InfoModel
 from utilities.strToInt import parseInt
 from utilities.passwordManager import generate_salt, generate_digest, validate_password
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend/dist')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config["JWT_TOKEN_LOCATION"] = ["headers"] # options: "cookies", "json", "query_string"
 app.config["JWT_COOKIE_SECURE"] = True # only allow the cookies that contain your JWTs to be sent over https
@@ -24,7 +25,7 @@ app.config["JWT_COOKIE_SAMESITE"] = "None"
 app.config["JWT_SECRET_KEY"] = "super-secret-jfi;l_8"
 app.secret_key = 'keyyyyyyyyyyy-y^%#M.'
 # app.config['CORS_HEADERS'] = 'Content-Type'
-whitelist = ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://127.0.0.1:3000', 'https://localhost:3000']
+whitelist = ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://127.0.0.1:3000', 'https://localhost:3000', 'https://127.0.0.1:5000',]
 cors = CORS(app, resources={r"/api/*": {"origins": whitelist}}, supports_credentials=True) # https://flask-cors.readthedocs.io/en/latest/
 api = Api(app)
 jwt = JWTManager(app)
@@ -43,6 +44,7 @@ userParser = reqparse.RequestParser()
 userParser.add_argument('username', type=str, required=True, help='username cannot be blank.')
 userParser.add_argument('password', type=str, required=True, help='password cannot be blank.')
 userParser.add_argument('description', type=str, required=False)
+userParser.add_argument('avatar', type=str, required=False)
         
 class UserPost(Resource):
     @cross_origin()
@@ -59,10 +61,15 @@ class UserPost(Resource):
             return {'message': 'Invalid username or password.'}, 400
         if args['description'] is not None :
             description = args['description']
+        if args['avatar'] is not None and len(args['avatar']) > 80000: # 50KB
+            return {'message': 'Invalid image.'}, 400
+        if args['avatar'] is not None:
+            avatar = args['avatar']
+            print('avatar lenght:', len(args['avatar']))
 
         salt = generate_salt()
         hashed_password = generate_digest(args['password'], salt)
-        UserModel.create_user(args['username'], salt, hashed_password, description)
+        UserModel.create_user(args['username'], salt, hashed_password, description, avatar)
         return jsonify({'message': 'Create successfully.'}) #201前端收不到?
 
 # for test
@@ -207,6 +214,15 @@ api.add_resource(CommentListOfUser, '/api/comments/<int:idUser>') # 之後把use
 api.add_resource(Login, '/api/login')
 api.add_resource(VistCount, '/api/visitCount')
 # http://localhost:5000/api/user/1
+
+# Serve React App
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
 
 if __name__ == "__main__":
     from db import db
