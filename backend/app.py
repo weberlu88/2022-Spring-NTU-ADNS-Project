@@ -52,6 +52,7 @@ class UserPost(Resource):
         ''' 新增用戶(註冊) '''
         args = userParser.parse_args()
         description = ''
+        avatar = ''
         # print(args['username'], args['password'])
         if len(args['username']) == 0 or len(args['username']) > 20 or len(args['password']) > 20:
             return {'message': 'Invalid username or password.'}, 400
